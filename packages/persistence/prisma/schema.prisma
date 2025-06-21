@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+generator nexusPrisma {
+  provider = "nexus-prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String             @id // Will be set by Clerk
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  submissions   Submission[]
+  organizations OrganizationUser[]
+}
+
+model Organization {
+  id        String             @id // Will be set by Clerk
+  name      String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  projects  Project[]
+  users     OrganizationUser[]
+}
+
+enum OrganizationRole {
+  Admin
+  Member
+}
+
+enum OrganizationUserStatus {
+  Active
+  Pending
+  Invited
+  Banned
+}
+
+model OrganizationUser {
+  id             String                 @id @default(uuid())
+  organizationId String
+  userId         String
+  role           OrganizationRole       @default(Member)
+  status         OrganizationUserStatus @default(Active)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+}
+
+model Project {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  forms        Form[]
+}
+
+model Form {
+  id           String   @id @default(uuid())
+  projectId    String
+  name         String
+  endpointSlug String   @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project          Project           @relation(fields: [projectId], references: [id])
+  submissions      Submission[]
+  formIntegrations FormIntegration[]
+  Integration      Integration[]
+}
+
+model Submission {
+  id        String   @id @default(cuid())
+  formId    String
+  userId    String? // optional: Clerk user ID (nullable for anonymous forms)
+  payload   Json
+  createdAt DateTime @default(now())
+
+  form            Form             @relation(fields: [formId], references: [id])
+  user            User?            @relation(fields: [userId], references: [id])
+  SubmissionTrace SubmissionTrace?
+}
+
+model SubmissionTrace {
+  id           String     @id @default(cuid())
+  submissionId String     @unique
+  ipAddress    String?
+  userAgent    String?
+  city         String?
+  region       String?
+  country      String?
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime   @default(now())
+  submission   Submission @relation(fields: [submissionId], references: [id])
+}
+
+model FormIntegration {
+  id            String           @id @default(uuid())
+  formId        String
+  integrationId String
+  config        Json
+  createdAt     DateTime         @default(now())
+  state         IntegrationState
+  errorReason   String?
+  connectedAt   DateTime?
+  form          Form             @relation(fields: [formId], references: [id])
+  integration   Integration      @relation(fields: [integrationId], references: [id])
+}
+
+model Integration {
+  id              String            @id @default(uuid())
+  name            String
+  type            IntegrationType
+  isPremium       Boolean           @default(false)
+  assets          Asset[]
+  createdAt       DateTime          @default(now())
+  form            Form?             @relation(fields: [formId], references: [id])
+  formId          String?
+  formIntegration FormIntegration[]
+}
+
+model Asset {
+  id          String   @id @default(uuid())
+  key         String
+  hash        String?
+  aspectRatio Float?
+  size        Int?
+  mimeType    String?
+  createdAt   DateTime @default(now())
+
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id])
+}
+
+enum IntegrationState {
+  Connected
+  Disconnected
+}
+
+enum IntegrationType {
+  Email
+  Slack
+  Discord
+  Webhook
+  Telegram
+  Linear
+}

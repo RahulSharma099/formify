@@ -1,0 +1,39 @@
+{
+  "name": "@formify/persistence",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "dotenv -e ../../.env prisma generate && tsup --format esm,cjs,iife",
+    "dev": "tsup --format esm,cjs,iife --watch",
+    "prisma:generate": "dotenv -e ../../.env prisma generate",
+    "prisma:migrate:dev": "dotenv -e ../../.env prisma migrate dev",
+    "prisma:migrate:deploy": "dotenv -e ../../.env prisma migrate deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.0",
+  "devDependencies": {
+    "@microsoft/api-extractor": "^7.52.8",
+    "@types/node": "^22.15.24",
+    "dotenv-cli": "^8.0.0",
+    "prisma": "^6.8.2",
+    "tsup": "8.0.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "dotenv": "^16.5.0",
+    "envalid": "^8.0.0",
+    "ioredis": "^5.6.1",
+    "nexus-prisma": "^2.0.8"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
