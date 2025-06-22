@@ -1,5 +1,12 @@
+import { $settings } from "nexus-prisma";
+$settings({
+  checks: {
+    PrismaClientOnContext: false,
+  },
+});
+
 export * from "./lib/redis-client";
-export { prisma } from "./lib/db";
+export { PrismaClient } from "@prisma/client";
 export * from "@prisma/client";
 export * from "./lib/redis";
 export * as nexus from "nexus-prisma";

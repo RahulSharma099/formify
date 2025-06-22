@@ -1,6 +1,6 @@
 import { fieldAuthorizePlugin, makeSchema } from "nexus";
 import path from "path";
-import { nexusScalars } from "@formify/persistence";
+import { nexusScalars, nexus } from "@formify/persistence";
 import user from "./user/user.typedefs";
 import organization from "./organization/organization.typedefs";
 

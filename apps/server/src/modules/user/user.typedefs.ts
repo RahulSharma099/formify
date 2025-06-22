@@ -1,7 +1,6 @@
 import { extendType, nonNull, objectType } from "nexus";
 import { nexus } from "@formify/persistence";
-import { createGraphQLError } from "graphql-yoga";
-import { GraphQLError } from "graphql";
+import { isUser } from "../../lib/permissions";
 
 const NexusUser = nexus.User;
 
@@ -21,11 +20,9 @@ const Query = extendType({
   definition(t) {
     t.field("me", {
       type: nonNull("User"),
-      authorize: () => true,
-      resolve: async (_parent, _args, { prisma }) => {
+      authorize: isUser,
+      resolve: async (_parent, _args, { prisma, auth }) => {
         const user = await prisma.user.findFirstOrThrow();
-
-        console.log("User found:", user);
 
         return user;
       },

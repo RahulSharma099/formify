@@ -32,8 +32,5 @@
     "envalid": "^8.0.0",
     "ioredis": "^5.6.1",
     "nexus-prisma": "^2.0.8"
-  },
-  "exports": {
-    ".": "./src/index.ts"
   }
 }
